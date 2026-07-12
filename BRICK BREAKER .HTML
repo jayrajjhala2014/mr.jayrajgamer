@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ultimate Brick Breaker</title>
+
+<style>
+body{
+    margin:0;
+    background:white;
+    font-family:Arial;
+    text-align:center;
+    color:#5d4037;
+}
+
+h1{
+    margin:10px;
+}
+
+#info{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.box{
+    background:#6d4c41;
+    color:white;
+    padding:10px 20px;
+    border-radius:10px;
+}
+
+button{
+    background:#6d4c41;
+    color:white;
+    border:none;
+    padding:12px 25px;
+    margin:10px;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#8d6e63;
+}
+
+canvas{
+    background:#faf7f2;
+    border:5px solid #6d4c41;
+    border-radius:10px;
+    max-width:95%;
+}
+
+#message{
+    font-size:30px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🧱 Ultimate Brick Breaker</h1>
+
+<div id="info">
+<div class="box">Score: <span id="score">0</span></div>
+<div class="box">Lives: <span id="lives">3</span></div>
+<div class="box">Level: <span id="level">1</span></div>
+<div class="box">High: <span id="high">0</span></div>
+</div>
+
+<br>
+
+<button onclick="startGame()">▶ PLAY</button>
+<button onclick="newGame()">🔄 NEW GAME</button>
+<button onclick="pauseGame()">⏸ PAUSE</button>
+
+<br>
+
+<canvas id="game" width="800" height="500"></canvas>
+
+<div id="message"></div>
+
+
+<script>
+
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+let score=0;
+let lives=3;
+let level=1;
+let running=false;
+let paused=false;
+
+let high=localStorage.getItem("brickHigh")||0;
+document.getElementById("high").innerHTML=high;
+
+
+let paddle={
+x:340,
+y:460,
+w:120,
+h:15,
+speed:8
+};
+
+
+let ball={
+x:400,
+y:300,
+r:10,
+dx:5,
+dy:-5
+};
+
+
+let bricks=[];
+let particles=[];
+let power=[];
+
+
+function createBricks(){
+
+bricks=[];
+
+for(let r=0;r<4+level;r++){
+
+bricks[r]=[];
+
+for(let c=0;c<10;c++){
+
+bricks[r][c]={
+x:40+c*75,
+y:40+r*30,
+w:65,
+h:20,
+alive:true
+};
+
+}
+
+}
+
+}
+
+
+let left=false;
+let right=false;
+
+
+document.addEventListener("keydown",e=>{
+
+if(e.key=="ArrowLeft")
+left=true;
+
+if(e.key=="ArrowRight")
+right=true;
+
+});
+
+
+document.addEventListener("keyup",e=>{
+
+if(e.key=="ArrowLeft")
+left=false;
+
+if(e.key=="ArrowRight")
+right=false;
+
+});
+
+
+canvas.addEventListener("touchmove",e=>{
+
+let rect=canvas.getBoundingClientRect();
+
+paddle.x=e.touches[0].clientX-rect.left-paddle.w/2;
+
+});
+
+
+function startGame(){
+
+running=true;
+paused=false;
+document.getElementById("message").innerHTML="";
+
+createBricks();
+
+loop();
+
+}
+
+
+function newGame(){
+
+score=0;
+lives=3;
+level=1;
+
+ball.x=400;
+ball.y=300;
+
+document.getElementById("score").innerHTML=0;
+document.getElementById("lives").innerHTML=3;
+
+startGame();
+
+}
+
+
+function pauseGame(){
+
+paused=!paused;
+
+}
+
+
+function drawPaddle(){
+
+ctx.fillStyle="#6d4c41";
+
+ctx.fillRect(
+paddle.x,
+paddle.y,
+paddle.w,
+paddle.h
+);
+
+}
+
+
+function drawBall(){
+
+ctx.beginPath();
+
+ctx.arc(
+ball.x,
+ball.y,
+ball.r,
+0,
+Math.PI*2
+);
+
+ctx.fillStyle="#8d6e63";
+
+ctx.fill();
+
+}
+
+
+
+function drawBricks(){
+
+for(let r of bricks){
+
+for(let b of r){
+
+if(b.alive){
+
+ctx.fillStyle="#8d6e63";
+
+ctx.fillRect(
+b.x,
+b.y,
+b.w,
+b.h
+);
+
+}
+
+}
+
+}
+
+}
+
+
+
+function makeParticles(x,y){
+
+for(let i=0;i<10;i++){
+
+particles.push({
+
+x:x,
+y:y,
+dx:(Math.random()-0.5)*5,
+dy:(Math.random()-0.5)*5,
+life:30
+
+});
+
+}
+
+}
+
+
+
+function drawParticles(){
+
+for(let p of particles){
+
+ctx.fillStyle="#6d4c41";
+
+ctx.fillRect(
+p.x,
+p.y,
+4,
+4
+);
+
+p.x+=p.dx;
+p.y+=p.dy;
+p.life--;
+
+}
+
+particles=particles.filter(p=>p.life>0);
+
+}
+
+
+
+function collision(){
+
+for(let r of bricks){
+
+for(let b of r){
+
+if(b.alive){
+
+if(
+ball.x>b.x &&
+ball.x<b.x+b.w &&
+ball.y>b.y &&
+ball.y<b.y+b.h
+){
+
+b.alive=false;
+
+ball.dy=-ball.dy;
+
+score+=10;
+
+makeParticles(ball.x,ball.y);
+
+}
+
+}
+
+}
+
+}
+
+}
+
+
+
+function update(){
+
+if(left)
+paddle.x-=paddle.speed;
+
+if(right)
+paddle.x+=paddle.speed;
+
+
+if(paddle.x<0)
+paddle.x=0;
+
+if(paddle.x+paddle.w>canvas.width)
+paddle.x=canvas.width-paddle.w;
+
+
+
+ball.x+=ball.dx;
+ball.y+=ball.dy;
+
+
+
+if(ball.x<0 || ball.x>canvas.width)
+ball.dx=-ball.dx;
+
+
+if(ball.y<0)
+ball.dy=-ball.dy;
+
+
+
+if(
+ball.y+ball.r>paddle.y &&
+ball.x>paddle.x &&
+ball.x<paddle.x+paddle.w
+)
+ball.dy=-ball.dy;
+
+
+
+if(ball.y>canvas.height){
+
+lives--;
+
+document.getElementById("lives").innerHTML=lives;
+
+ball.x=400;
+ball.y=300;
+
+
+if(lives<=0){
+
+running=false;
+
+document.getElementById("message").innerHTML="💀 GAME OVER";
+
+}
+
+}
+
+
+
+collision();
+
+
+
+let leftBricks=0;
+
+for(let r of bricks)
+
+for(let b of r)
+
+if(b.alive)
+leftBricks++;
+
+
+if(leftBricks==0){
+
+level++;
+
+document.getElementById("level").innerHTML=level;
+
+createBricks();
+
+}
+
+
+
+if(score>high){
+
+high=score;
+
+localStorage.setItem("brickHigh",high);
+
+document.getElementById("high").innerHTML=high;
+
+}
+
+
+document.getElementById("score").innerHTML=score;
+
+
+}
+
+
+
+function loop(){
+
+if(!running)
+return;
+
+
+requestAnimationFrame(loop);
+
+
+ctx.clearRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+
+drawBricks();
+drawPaddle();
+drawBall();
+drawParticles();
+
+
+if(!paused)
+update();
+
+
+}
+
+
+</script>
+
+</body>
+</html>
