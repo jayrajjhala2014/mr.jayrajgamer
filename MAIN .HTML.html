@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MR JAY - Premium Gaming Hub</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
+}
+
+body{
+background:#090909;
+color:#fff;
+overflow-x:hidden;
+}
+
+/* Animated Background */
+
+body::before{
+content:"";
+position:fixed;
+left:0;
+top:0;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at 20% 20%,#ffd70033,transparent 35%),
+radial-gradient(circle at 80% 40%,#ff980033,transparent 35%),
+radial-gradient(circle at 50% 90%,#ffffff11,transparent 30%);
+animation:bgMove 10s linear infinite alternate;
+z-index:-1;
+}
+
+@keyframes bgMove{
+from{
+transform:scale(1);
+}
+to{
+transform:scale(1.2) rotate(3deg);
+}
+}
+
+/* Navbar */
+
+nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 8%;
+background:#111;
+position:sticky;
+top:0;
+z-index:999;
+box-shadow:0 5px 20px #000;
+}
+
+.logo{
+font-size:34px;
+font-weight:700;
+color:gold;
+}
+
+nav ul{
+display:flex;
+list-style:none;
+gap:30px;
+}
+
+nav ul li a{
+color:white;
+text-decoration:none;
+transition:.3s;
+}
+
+nav ul li a:hover{
+color:gold;
+}
+
+/* Hero */
+
+.hero{
+height:90vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:20px;
+}
+
+.hero h1{
+font-size:70px;
+color:gold;
+}
+
+.hero p{
+font-size:22px;
+margin-top:15px;
+max-width:700px;
+}
+
+.playBtn{
+margin-top:30px;
+padding:18px 45px;
+font-size:20px;
+background:gold;
+color:black;
+border:none;
+border-radius:50px;
+cursor:pointer;
+font-weight:bold;
+transition:.3s;
+}
+
+.playBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 30px gold;
+}
+
+/* Games */
+
+.games{
+padding:80px 8%;
+}
+
+.games h2{
+text-align:center;
+font-size:42px;
+margin-bottom:40px;
+color:gold;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:25px;
+}
+
+.card{
+background:#181818;
+border-radius:20px;
+padding:25px;
+transition:.4s;
+box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+.card:hover{
+transform:translateY(-10px);
+box-shadow:0 0 25px gold;
+}
+
+.card h3{
+margin-bottom:10px;
+}
+
+.card button{
+margin-top:20px;
+padding:12px 25px;
+background:gold;
+border:none;
+border-radius:30px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.gameArea{
+margin-top:70px;
+background:#111;
+padding:30px;
+border-radius:20px;
+display:none;
+}
+
+canvas{
+background:#000;
+display:block;
+margin:auto;
+border:4px solid gold;
+}
+
+footer{
+padding:30px;
+text-align:center;
+background:#111;
+margin-top:80px;
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+
+<div class="logo">
+MR JAY
+</div>
+
+<ul>
+<li><a href="#">Home</a></li>
+<li><a href="#">Games</a></li>
+<li><a href="#">Leaderboard</a></li>
+<li><a href="#">About</a></li>
+</ul>
+
+</nav>
+
+<section class="hero">
+
+<h1>MR JAY</h1>
+
+<p>
+Premium Gaming Website with Ready-to-Play Games.
+Built using HTML, CSS and JavaScript.
+</p>
+
+<button class="playBtn">
+Play Now
+</button>
+
+</section>
+
+<section class="games">
+
+<h2>Choose Your Game</h2>
+
+<div class="grid">
+
+<div class="card">
+<h3>Snake Game</h3>
+<p>Classic snake game.</p>
+<button onclick="startSnake()">
+Play
+</button>
+</div>
+
+<div class="card">
+<h3>Tic Tac Toe</h3>
+<p>Play against your friend.</p>
+<button onclick="startTicTacToe()">
+Play
+</button>
+</div>
+
+<div class="card">
+<h3>Memory Game</h3>
+<p>Test your memory.</p>
+<button onclick="startMemory()">
+Play
+</button>
+</div>
+
+<div class="card">
+<h3>Rock Paper Scissors</h3>
+<p>Beat the computer.</p>
+<button onclick="startRPS()">
+Play
+</button>
+</div>
+
+</div>
+
+<div class="gameArea" id="gameArea">
+
+</div>
+
+</section>
+
+<footer>
+
+© 2026 MR JAY Gaming Hub
+
+</footer>
+
+<script>
+// ===========================
+// MR JAY - PART 2
+// ===========================
+
+// Select Game Area
+const gameArea = document.getElementById("gameArea");
+
+// ---------- Snake Game ----------
+
+let canvas, ctx;
+let snake = [];
+let food = {};
+let dx = 20;
+let dy = 0;
+let score = 0;
+let gameLoop;
+
+function startSnake(){
+
+gameArea.style.display="block";
+
+gameArea.innerHTML=`
+
+<h2 style="text-align:center;color:gold;margin-bottom:20px;">
+🐍 Snake Game
+</h2>
+
+<p style="text-align:center;">
+Score:
+<span id="score">0</span>
+</p>
+
+<canvas id="snakeCanvas" width="400" height="400"></canvas>
+
+`;
+
+canvas=document.getElementById("snakeCanvas");
+ctx=canvas.getContext("2d");
+
+snake=[
+{x:200,y:200}
+];
+
+food={
+x:Math.floor(Math.random()*20)*20,
+y:Math.floor(Math.random()*20)*20
+};
+
+dx=20;
+dy=0;
+score=0;
+
+clearInterval(gameLoop);
+
+gameLoop=setInterval(drawSnake,120);
+
+document.onkeydown=changeDirection;
+
+}
+
+function drawSnake(){
+
+ctx.fillStyle="#000";
+ctx.fillRect(0,0,400,400);
+
+ctx.fillStyle="gold";
+
+snake.forEach(part=>{
+ctx.fillRect(part.x,part.y,20,20);
+});
+
+ctx.fillStyle="red";
+ctx.fillRect(food.x,food.y,20,20);
+
+let head={
+x:snake[0].x+dx,
+y:snake[0].y+dy
+};
+
+snake.unshift(head);
+
+if(head.x==food.x && head.y==food.y){
+
+score++;
+
+document.getElementById("score").innerHTML=score;
+
+food={
+x:Math.floor(Math.random()*20)*20,
+y:Math.floor(Math.random()*20)*20
+};
+
+}else{
+
+snake.pop();
+
+}
+
+if(
+head.x<0||
+head.y<0||
+head.x>=400||
+head.y>=400
+){
+
+clearInterval(gameLoop);
+
+alert("Game Over!");
+
+}
+
+}
+
+function changeDirection(e){
+
+if(e.key=="ArrowUp" && dy==0){
+dx=0;
+dy=-20;
+}
+
+if(e.key=="ArrowDown" && dy==0){
+dx=0;
+dy=20;
+}
+
+if(e.key=="ArrowLeft" && dx==0){
+dx=-20;
+dy=0;
+}
+
+if(e.key=="ArrowRight" && dx==0){
+dx=20;
+dy=0;
+}
+
+}
+
+// ---------- Placeholder Functions ----------
+
+function startTicTacToe(){
+
+gameArea.style.display="block";
+
+gameArea.innerHTML=`
+
+<h2 style="color:gold;text-align:center;">
+Tic Tac Toe
+</h2>
+
+<p style="text-align:center;">
+Coming in Part 3...
+</p>
+
+`;
+
+}
+
+function startMemory(){
+
+gameArea.style.display="block";
+
+gameArea.innerHTML=`
+
+<h2 style="color:gold;text-align:center;">
+Memory Game
+</h2>
+
+<p style="text-align:center;">
+Coming in Part 3...
+</p>
+
+`;
+
+}
+
+function startRPS(){
+
+gameArea.style.display="block";
+
+gameArea.innerHTML=`
+
+<h2 style="color:gold;text-align:center;">
+Rock Paper Scissors
+</h2>
+
+<p style="text-align:center;">
+Coming in Part 3...
+</p>
+
+`;
+
+}
+// ===============================
+// MR JAY - PART 3
+// Tic Tac Toe
+// ===============================
+
+let board;
+let currentPlayer;
+
+function startTicTacToe(){
+
+gameArea.style.display="block";
+
+board=["","","","","","","","",""];
+currentPlayer="X";
+
+gameArea.innerHTML=`
+<h2 style="text-align:center;color:gold;">Tic Tac Toe</h2>
+
+<div id="ticBoard"
+style="
+display:grid;
+grid-template-columns:repeat(3,100px);
+gap:10px;
+justify-content:center;
+margin-top:20px;
+">
+</div>
+
+<p id="status"
+style="text-align:center;margin-top:20px;font-size:22px;">
+Player X Turn
+</p>
+`;
+
+const tic=document.getElementById("ticBoard");
+
+for(let i=0;i<9;i++){
+
+const cell=document.createElement("div");
+
+cell.style.width="100px";
+cell.style.height="100px";
+cell.style.background="#222";
+cell.style.display="flex";
+cell.style.alignItems="center";
+cell.style.justifyContent="center";
+cell.style.fontSize="40px";
+cell.style.cursor="pointer";
+cell.style.border="2px solid gold";
+
+cell.onclick=()=>playMove(i);
+
+tic.appendChild(cell);
+
+}
+
+}
+
+function playMove(i){
+
+if(board[i]!="") return;
+
+board[i]=currentPlayer;
+
+document.getElementById("ticBoard").children[i].innerHTML=currentPlayer;
+
+const wins=[
+[0,1,2],
+[3,4,5],
+[6,7,8],
+[0,3,6],
+[1,4,7],
+[2,5,8],
+[0,4,8],
+[2,4,6]
+];
+
+for(let w of wins){
+
+let[a,b,c]=w;
+
+if(board[a]&&board[a]==board[b]&&board[a]==board[c]){
+
+document.getElementById("status").innerHTML=
+"🎉 Player "+currentPlayer+" Wins!";
+
+return;
+
+}
+
+}
+
+if(!board.includes("")){
+
+document.getElementById("status").innerHTML="Draw!";
+
+return;
+
+}
+
+currentPlayer=currentPlayer=="X"?"O":"X";
+
+document.getElementById("status").innerHTML=
+"Player "+currentPlayer+" Turn";
+
+}
+
+// ===============================
+// Memory Game
+// ===============================
+
+function startMemory(){
+
+gameArea.style.display="block";
+
+const cards=["🍎","🍎","🍌","🍌","🍇","🍇","🍉","🍉"];
+
+cards.sort(()=>Math.random()-0.5);
+
+gameArea.innerHTML=`
+<h2 style="text-align:center;color:gold;">Memory Game</h2>
+
+<div id="memoryGrid"
+style="
+display:grid;
+grid-template-columns:repeat(4,90px);
+gap:10px;
+justify-content:center;
+margin-top:20px;
+"></div>
+`;
+
+let first=null;
+let second=null;
+
+const grid=document.getElementById("memoryGrid");
+
+cards.forEach(icon=>{
+
+const card=document.createElement("div");
+
+card.innerHTML="?";
+
+card.dataset.icon=icon;
+
+card.style.width="90px";
+card.style.height="90px";
+card.style.background="#222";
+card.style.display="flex";
+card.style.alignItems="center";
+card.style.justifyContent="center";
+card.style.fontSize="35px";
+card.style.cursor="pointer";
+card.style.border="2px solid gold";
+
+card.onclick=function(){
+
+if(this.innerHTML!="?") return;
+
+this.innerHTML=this.dataset.icon;
+
+if(!first){
+
+first=this;
+
+}else{
+
+second=this;
+
+if(first.dataset.icon!=second.dataset.icon){
+
+setTimeout(()=>{
+
+first.innerHTML="?";
+second.innerHTML="?";
+
+first=null;
+second=null;
+
+},700);
+
+}else{
+
+first=null;
+second=null;
+
+}
+
+}
+
+};
+
+grid.appendChild(card);
+
+});
+
+}
+// ===============================
+// MR JAY - PART 4
+// Rock Paper Scissors
+// ===============================
+
+let totalWins = 0;
+let totalLosses = 0;
+let totalDraws = 0;
+
+function startRPS(){
+
+gameArea.style.display="block";
+
+gameArea.innerHTML=`
+
+<h2 style="text-align:center;color:gold;">
+✊ Rock Paper Scissors
+</h2>
+
+<div style="text-align:center;margin-top:30px;">
+
+<button onclick="playRPS('Rock')">🪨 Rock</button>
+
+<button onclick="playRPS('Paper')">📄 Paper</button>
+
+<button onclick="playRPS('Scissors')">✂️ Scissors</button>
+
+</div>
+
+<h3 id="rpsResult"
+style="text-align:center;margin-top:30px;">
+Choose your move
+</h3>
+
+<div style="text-align:center;margin-top:25px;">
+
+<p>🏆 Wins :
+<span id="wins">0</span></p>
+
+<p>❌ Losses :
+<span id="losses">0</span></p>
+
+<p>🤝 Draws :
+<span id="draws">0</span></p>
+
+</div>
+
+`;
+
+}
+
+function playRPS(player){
+
+const options=["Rock","Paper","Scissors"];
+
+const computer=options[Math.floor(Math.random()*3)];
+
+let result="";
+
+if(player===computer){
+
+result="🤝 Draw";
+
+totalDraws++;
+
+}
+
+else if(
+
+(player==="Rock" && computer==="Scissors")||
+
+(player==="Paper" && computer==="Rock")||
+
+(player==="Scissors" && computer==="Paper")
+
+){
+
+result="🎉 You Win!";
+
+totalWins++;
+
+}
+
+else{
+
+result="😢 Computer Wins";
+
+totalLosses++;
+
+}
+
+document.getElementById("rpsResult").innerHTML=
+
+`
+You : <b>${player}</b><br>
+
+Computer : <b>${computer}</b><br><br>
+
+${result}
+
+`;
+
+document.getElementById("wins").innerHTML=totalWins;
+document.getElementById("losses").innerHTML=totalLosses;
+document.getElementById("draws").innerHTML=totalDraws;
+
+}
+
+// ===============================
+// Number Guessing Game
+// ===============================
+
+function startGuessGame(){
+
+gameArea.style.display="block";
+
+let number=Math.floor(Math.random()*100)+1;
+
+gameArea.innerHTML=`
+
+<h2 style="text-align:center;color:gold;">
+
+🎯 Guess The Number
+
+</h2>
+
+<p style="text-align:center;">
+Guess a number between 1 and 100
+</p>
+
+<div style="text-align:center;">
+
+<input
+id="guessInput"
+type="number"
+placeholder="Enter Number"
+style="
+padding:10px;
+font-size:18px;
+width:180px;
+">
+
+<br><br>
+
+<button onclick="checkGuess()">
+
+Guess
+
+</button>
+
+</div>
+
+<p
+id="guessResult"
+style="
+text-align:center;
+margin-top:25px;
+font-size:22px;
+">
+Good Luck!
+</p>
+
+`;
+
+window.checkGuess=function(){
+
+let guess=Number(document.getElementById("guessInput").value);
+
+if(guess===number){
+
+document.getElementById("guessResult").innerHTML=
+"🎉 Correct!";
+
+}
+
+else if(guess<number){
+
+document.getElementById("guessResult").innerHTML=
+"⬆️ Too Low";
+
+}
+
+else{
+
+document.getElementById("guessResult").innerHTML=
+"⬇️ Too High";
+
+}
+
+}
+
+}
+
+// ===============================
+// MR JAY - PART 5
+// Dashboard & Premium Features
+// ===============================
+
+// Welcome Message
+window.onload = function(){
+
+alert("🎮 Welcome to MR JAY Gaming Hub!");
+
+};
+
+// Smooth Scroll
+document.querySelector(".playBtn").onclick=function(){
+
+document.querySelector(".games").scrollIntoView({
+
+behavior:"smooth"
+
+});
+
+};
+
+// Leaderboard Data
+
+const leaderboard=[
+
+{name:"Jay",score:1200},
+
+{name:"Alex",score:980},
+
+{name:"Rohan",score:850},
+
+{name:"Aman",score:700}
+
+];
+
+// Show Leaderboard
+
+function showLeaderboard(){
+
+gameArea.style.display="block";
+
+let html=`
+
+<h2 style="text-align:center;color:gold;">
+
+🏆 Leaderboard
+
+</h2>
+
+<table
+style="
+width:100%;
+max-width:500px;
+margin:auto;
+border-collapse:collapse;
+margin-top:20px;
+">
+
+<tr>
+
+<th>Rank</th>
+
+<th>Player</th>
+
+<th>Score</th>
+
+</tr>
+
+`;
+
+leaderboard.forEach((p,index)=>{
+
+html+=`
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${p.name}</td>
+
+<td>${p.score}</td>
+
+</tr>
+
+`;
+
+});
+
+html+=`
+
+</table>
+
+`;
+
+gameArea.innerHTML=html;
+
+}
+
+// About Page
+
+function showAbout(){
+
+gameArea.style.display="block";
+
+gameArea.innerHTML=`
+
+<h2 style="color:gold;text-align:center;">
+
+About MR JAY
+
+</h2>
+
+<p style="margin-top:20px;text-align:center;line-height:2;">
+
+MR JAY is a Premium Gaming Website built using
+HTML, CSS and JavaScript.
+
+Features:
+
+✔ Snake Game
+
+✔ Tic Tac Toe
+
+✔ Memory Game
+
+✔ Rock Paper Scissors
+
+✔ Number Guessing Game
+
+✔ Premium UI
+
+✔ Mobile Responsive
+
+✔ Fast Performance
+
+</p>
+
+`;
+
+}
+
+// Footer Year
+
+document.querySelector("footer").innerHTML=
+
+"© "+new Date().getFullYear()+" MR JAY Gaming Hub | All Rights Reserved";
+
+// Navbar Links
+
+document.querySelectorAll("nav a")[2].onclick=function(e){
+
+e.preventDefault();
+
+showLeaderboard();
+
+};
+
+document.querySelectorAll("nav a")[3].onclick=function(e){
+
+e.preventDefault();
+
+showAbout();
+
+};
+// ===============================
+// MR JAY - FINAL PART
+// ===============================
+
+// Loading Animation
+window.addEventListener("load", () => {
+    document.body.style.opacity = "0";
+    document.body.style.transition = "opacity 0.8s";
+
+    setTimeout(() => {
+        document.body.style.opacity = "1";
+    }, 100);
+});
+
+// Button Hover Effect
+document.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("mouseover", () => {
+        btn.style.transform = "scale(1.05)";
+    });
+
+    btn.addEventListener("mouseout", () => {
+        btn.style.transform = "scale(1)";
+    });
+});
+
+// Simple Keyboard Shortcut
+document.addEventListener("keydown", function(e) {
+
+    if(e.key === "F1"){
+        e.preventDefault();
+        alert("🎮 Welcome to MR JAY Gaming Hub!");
+    }
+
+});
+
+console.log("MR JAY Gaming Website Loaded Successfully!");
+
+</script>
+
+</body>
+</html>
